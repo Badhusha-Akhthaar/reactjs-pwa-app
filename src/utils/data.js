@@ -19,40 +19,50 @@ export async function initializeData() {
         const ENTITY_URLS  = [ROOT_URL,STOPITEM_URL,STOP_URL,ITEM_URL];
         let fetchStart = Date.now();
         console.log(`Fetch Start ${fetchStart}`)
-        await axios
-                .all(ENTITY_URLS)
-                .then(axios.spread((...responses)=>{
-                    let ENTITY_NAMES = ["ROOT","STOPITEM","STOP","ITEM"];
-                    let _saveToIndexedDB = [];
-                    responses.forEach((response,i)=>{
-                        response.data.d.results.forEach(e => {
-                            e._id = e.tor_id;
-                            delete e.__metadata
-                            return e
-                        })
-                        _saveToIndexedDB.push(writeToIndexedDB(response.data.d.results,ENTITY_NAMES[i]));
+        return await axios
+                    .all(ENTITY_URLS)
+                    .then(axios.spread((...responses)=>{
+                        let ENTITY_NAMES = ["ROOT","STOPITEM","STOP","ITEM"];
+                        let _saveToIndexedDB = [];
+                        responses.forEach((response,i)=>{
+                            response.data.d.results.forEach(e => {
+                                e._id = e.tor_id;
+                                delete e.__metadata
+                                return e
+                            })
+                            _saveToIndexedDB.push(writeToIndexedDB(response.data.d.results,ENTITY_NAMES[i]));
+                        });
+                        return Promise.all(_saveToIndexedDB).then(()=>{
+                                    _configDB.put({"_id":"fetchConfig","didFetch":true});
+                                    return new Promise((resolve,reject)=>{
+                                        resolve(true);
+                                    });
+                                })
+                                .catch((err)=>{
+                                    console.log(`Error : ${err}`);
+                                    return new Promise((resolve,reject)=>{
+                                        reject(err);
+                                    });
+                                });
+                    }))
+                    .catch(err =>{
+                        console.log(`Error : ${err}`)
+                        return new Promise((resolve,reject)=>{
+                            reject(err);
+                        });
                     })
-                    Promise.all(_saveToIndexedDB).then(()=>{
-                        return true
-                    })
-                    .catch((err)=>{
-                        console.log(`Error : ${err}`);
-                        return false;
-                    })
-                }))
-                .catch(errors =>{
-                    console.log(`Error : ${errors}`)
-                })
-                .finally(()=>{
-                    _configDB.put({"_id":"fetchConfig","didFetch":true})
-                });
-        let fetchEnd = Date.now();
-        console.log(`Fetch Start ${fetchEnd}`)
-        console.log(`Time taken ${fetchEnd-fetchStart}`)
+                    .finally(()=>{
+                        let fetchEnd = Date.now();
+                        console.log(`Fetch Start ${fetchEnd}`)
+                        console.log(`Time taken ${fetchEnd-fetchStart}`)
+                    });
+        
     }
     else{
-        _configDB.get("fetchConfig");
-        console.log("Already data present. Skipped Fetching")
+        console.log("Already data present. Skipped Fetching");
+        return new Promise((resolve,reject)=>{
+            resolve(true);
+        });
     }
 }
 
