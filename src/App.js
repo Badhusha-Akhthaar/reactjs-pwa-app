@@ -15,7 +15,7 @@ function App() {
   },[])
   return (
     <>
-      <ShellBar primaryTitle="Shipment Execution"></ShellBar>
+      <ShellBar primaryTitle="Shipment Execution App"></ShellBar>
       <Routes>
         <Route path="/" element={<Main/>}/>
         <Route path="detail" element={<Details/>}/>

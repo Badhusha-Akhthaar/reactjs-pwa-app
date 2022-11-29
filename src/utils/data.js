@@ -78,3 +78,14 @@ function writeToIndexedDB(data,entityName){
         })
     });
 }
+
+export async function getShipmentData(){
+    let _shipmentData = new PouchDB('ROOT');
+    return _shipmentData.allDocs({include_docs: true})
+                .then((data)=>{
+                    return data;
+                })
+                .catch((err)=>{
+                    console.log("PouchDB Read Error")
+                });
+}
