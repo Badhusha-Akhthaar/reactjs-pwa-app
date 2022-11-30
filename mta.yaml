@@ -9,11 +9,3 @@ modules:
     disk-quota: 256M
     memory: 256M
     host: salesorder-pwa-dev
-
-build-parameters:
-  before-all:
-  - builder: custom
-    commands:
-    - npm install
-
-
